@@ -1,0 +1,21 @@
+---
+- hosts: all
+  become: yes
+  roles:
+    - geerlingguy.git
+    - angstwad.docker_ubuntu
+  tasks:
+    - easy_install: name=pip state=latest
+    - name: checkout kubernetes kube-deploy
+      git: repo=git://github.com/kubernetes/kube-deploy.git dest=~/kube-deploy clone=yes depth=1
+
+- hosts: master-*
+  become: yes
+  tasks:
+    - name: getting kubectl
+      shell: wget https://storage.googleapis.com/kubernetes-release/release/v1.3.6/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl
+      args:
+        chdir: /usr/local/bin/
+        creates: kubectl
+    - name: installing kubectl
+      file: path=/usr/local/bin/kubectl mode="u=rx,g=rx,o=rx"
