@@ -14,7 +14,7 @@ Ubuntu vms with kubernetes installed. provisioned by ansible!
  ```
 
 # How to use `VMs already created`
- If you have your VMs already created, the only thing you need to do is execute `ansible/playbook.yml` against your machines (VMs).
+ If you have your VMs already created, the only thing you need to do is execute `ansible/playbook.yml` against your machines (VMs) it can be Ubuntu 14.04/16.04.
  * prepare your inventory file like
   ```
   master-10.9.8.7 ansible_ssh_host={host} ansible_ssh_port={port} ansible_ssh_user='{user}' ansible_ssh_private_key_file='{private_key}'
