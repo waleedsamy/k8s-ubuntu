@@ -1,9 +1,27 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-def configure_vm(vm, master, **opts)
+$master_num_instances = 1
+$worker_num_instances = 3
 
-    private_ip = "10.9.8.#{opts[:ip]}"
+
+def masterIP(num)
+  return "10.9.8.#{num+6}"
+end
+
+def workerIP(num)
+  return "10.9.8.#{num+50}"
+end
+
+MASTER_IPs = [*1..$master_num_instances].map{ |i| masterIP(i) }
+WORKER_IPs = [*1..$worker_num_instances].map{ |i| workerIP(i) }
+
+def configure_vm(vm, **opts)
+
+    vm.provision "shell", inline: "apt-get install python -y"
+
+    private_ip = "#{opts[:ip]}"
+
     vm.box = opts.fetch(:box, "ubuntu/trusty64")
     vm.network :private_network, ip: private_ip
 
@@ -22,24 +40,18 @@ def configure_vm(vm, master, **opts)
     vm.provision "ansible" do |ansible|
       ansible.playbook = "ansible/playbook.yml"
       ansible.verbose = true
+      ansible.extra_vars = {
+        master_ip: MASTER_IPs[0]
+      }
       ansible.groups = {
-        "masters" => ["master[5:10]"],
-        "workers" => ["worker[50:60]"]
+        "masters" => ["master-10.9.8.[5:10]"],
+        "workers" => ["worker-10.9.8.[50:100]"]
       }
 
     end
 
-    if master then
-      vm.provision "shell", inline: "IP_ADDRESS=#{private_ip} ~/kube-deploy/docker-multinode/master.sh"
-    else
-      vm.provision "shell", inline: "IP_ADDRESS=#{private_ip} MASTER_IP=#{opts[:master]} ~/kube-deploy/docker-multinode/worker.sh"
-    end
-
 end
 
-$master_num_instances = 1
-$worker_num_instances = 3
-$master_ip = "10.9.8.7"
 
 Vagrant.configure("2") do |config|
 
@@ -59,22 +71,22 @@ Vagrant.configure("2") do |config|
 
   (1..$master_num_instances).each do |i|
 
-    ip = i + 6
+    ip = masterIP(i)
     name = "master-#{ip}"
 
     config.vm.define name do |master|
-      configure_vm(master.vm, true, ip: ip, name: name )
+      configure_vm(master.vm, ip: ip, name: name )
     end
 
   end
 
   (1..$worker_num_instances).each do |i|
 
-    ip = i + 50
+    ip = workerIP(i)
     name = "worker-#{ip}"
 
     config.vm.define name do |worker|
-      configure_vm(worker.vm, false, ip: ip, name: name, master: $master_ip  )
+      configure_vm(worker.vm, ip: ip, name: name )
     end
 
   end

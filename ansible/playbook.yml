@@ -11,7 +11,11 @@
 
 - hosts: master-*
   become: yes
+  vars:
+      ipv4: "{{ ansible_eth1.ipv4.address }}"
   tasks:
+    - name: install kubernetes
+      shell: IP_ADDRESS={{ ipv4 }} ~/kube-deploy/docker-multinode/master.sh
     - name: getting kubectl
       shell: wget https://storage.googleapis.com/kubernetes-release/release/v1.3.6/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl
       args:
@@ -19,3 +23,11 @@
         creates: kubectl
     - name: installing kubectl
       file: path=/usr/local/bin/kubectl mode="u=rx,g=rx,o=rx"
+
+- hosts: worker-*
+  become: yes
+  vars:
+      ipv4: "{{ ansible_eth1.ipv4.address }}"
+  tasks:
+    - name: install kubernetes
+      shell: MASTER_IP={{ master_ip }} IP_ADDRESS={{ ipv4 }} ~/kube-deploy/docker-multinode/worker.sh
