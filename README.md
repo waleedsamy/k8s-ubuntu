@@ -30,7 +30,7 @@ Ubuntu vms with kubernetes installed. provisioned by ansible!
 
   ```bash
   # extra-vars should has your master_ip
-  $ ansible-playbook --connection=ssh --timeout=30 --inventory-file={inventory-file} --extra-vars='{"master_ip":"{master_ip}"}' -v ansible/playbook.yml
+  $ ansible-playbook --connection=ssh --timeout=30 --inventory-file={inventory-file} --extra-vars="{\"master_ip\":\"10.9.8.7\",\"k8s_version\":\"v1.3.7\"}" -v ansible/playbook.yml
   ```
 
 # Kubernetes

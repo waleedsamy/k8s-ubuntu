@@ -13,25 +13,37 @@
   become: yes
   tasks:
     - name: install kubernetes on master machine runs Ubuntu 14.04
-      shell: IP_ADDRESS={{ ansible_eth1.ipv4.address }} ~/kube-deploy/docker-multinode/master.sh
+      shell: ~/kube-deploy/docker-multinode/master.sh
       when: (ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04")
+      environment:
+        IP_ADDRESS: "{{ ansible_eth1.ipv4.address }}"
+        K8S_VERSION: "{{ k8s_version }}"
     - name: install kubernetes on master machine runs Ubuntu 16.04
-      shell: IP_ADDRESS={{ ansible_ens32.ipv4.address }} ~/kube-deploy/docker-multinode/master.sh
+      shell: ~/kube-deploy/docker-multinode/master.sh
       when: (ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04")
+      environment:
+        IP_ADDRESS: "{{ ansible_ens32.ipv4.address }}"
+        K8S_VERSION: "{{ k8s_version }}"
     - name: getting kubectl
-      shell: wget https://storage.googleapis.com/kubernetes-release/release/v1.3.6/bin/linux/amd64/kubectl -O /usr/local/bin/kubectl
-      args:
-        chdir: /usr/local/bin/
-        creates: kubectl
-    - name: installing kubectl
-      file: path=/usr/local/bin/kubectl mode="u=rx,g=rx,o=rx"
+      get_url:
+        url: https://storage.googleapis.com/kubernetes-release/release/{{ k8s_version }}/bin/linux/amd64/kubectl
+        dest: /usr/local/bin/kubectl
+        mode: u=rx,g=rx,o=rx
 
 - hosts: worker-*
   become: yes
   tasks:
-    - name: install kubernetes on master machine runs Ubuntu 14.04
-      shell: MASTER_IP={{ master_ip }} IP_ADDRESS={{ ansible_eth1.ipv4.address }} ~/kube-deploy/docker-multinode/worker.sh
+    - name: install kubernetes on worker machine runs Ubuntu 14.04
+      shell: ~/kube-deploy/docker-multinode/worker.sh
       when: (ansible_distribution == "Ubuntu" and ansible_distribution_version == "14.04")
+      environment:
+        IP_ADDRESS: "{{ ansible_eth1.ipv4.address }}"
+        MASTER_IP: "{{ master_ip }}"
+        K8S_VERSION: "{{ k8s_version }}"
     - name: install kubernetes on worker machine runs Ubuntu 16.04
-      shell: MASTER_IP={{ master_ip }} IP_ADDRESS={{ ansible_ens32.ipv4.address }} ~/kube-deploy/docker-multinode/worker.sh
+      shell: ~/kube-deploy/docker-multinode/worker.sh
       when: (ansible_distribution == "Ubuntu" and ansible_distribution_version == "16.04")
+      environment:
+        IP_ADDRESS: "{{ ansible_ens32.ipv4.address }}"
+        MASTER_IP: "{{ master_ip }}"
+        K8S_VERSION: "{{ k8s_version }}"

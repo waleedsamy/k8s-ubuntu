@@ -41,7 +41,8 @@ def configure_vm(vm, **opts)
       ansible.playbook = "ansible/playbook.yml"
       ansible.verbose = true
       ansible.extra_vars = {
-        master_ip: MASTER_IPs[0]
+        master_ip: MASTER_IPs[0],
+        k8s_version: "v1.3.7"
       }
       ansible.groups = {
         "masters" => ["master-10.9.8.[5:10]"],
