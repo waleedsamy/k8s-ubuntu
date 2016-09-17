@@ -59,4 +59,12 @@ EOF
 command I used to use, and forget it everytime.
 ```bash
 $ ssh -p 2200 -i ./.vagrant/machines/master-7/virtualbox/private_key vagrant@127.0.0.1
+# debug iptables, by monitoring rule packets
+$ sudo iptables -L FORWARD -v
+# track network interface with tcpdump
+$ tcpdump -n -i flannel0
+# delete iptables rule by rule_number
+$ iptables -L FORWARD --line-numbers
+$ iptables -D FORWARD {rule_number}
+$ iptables -F FORWARD # if you like to delete all the chain of filter table (default table, can be changed with -t e.g. -t nat)
 ```
